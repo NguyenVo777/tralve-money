@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTravel - Khám phá thế giới, đổi tiền thông minh</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero {
+            padding: 100px 5% 60px;
+            text-align: center;
+            position: relative;
+        }
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+        .search-bar {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            padding: 8px 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            max-width: 800px;
+            width: 100%;
+        }
+        .search-bar .input-group {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 12px;
+            border-right: 1px solid var(--border);
+            padding-right: 16px;
+        }
+        .search-bar .input-group:last-of-type {
+            border-right: none;
+        }
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+        }
+        .search-bar i {
+            color: var(--primary);
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 0 5% 60px;
+        }
+        .feature-card {
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .feature-card .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .timeline-section {
+            padding: 60px 5%;
+            text-align: center;
+        }
+        .timeline-section h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        .timeline-section > p {
+            color: var(--text-muted);
+            margin-bottom: 60px;
+        }
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: var(--border);
+            transform: translateX(-50%);
+        }
+        .timeline-item {
+            position: relative;
+            width: 50%;
+            padding: 20px 40px;
+            box-sizing: border-box;
+        }
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-glow);
+            transform: translateY(-50%);
+        }
+        .timeline-item:nth-child(odd)::after {
+            right: -8px;
+        }
+        .timeline-item:nth-child(even)::after {
+            left: -8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            Smart<span>Travel</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="scan.html">Scan</a>
+            <a href="map.html">Locations</a>
+            <a href="#">History</a>
+            <a href="#">About</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="login.html" class="btn btn-outline" style="padding: 8px 16px;">Đăng nhập</a>
+            <a href="scan.html" class="btn btn-primary" style="padding: 8px 16px; border-radius: 20px;">Start Scanning</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1 class="text-gradient">Khám phá thế giới, đổi tiền thông minh</h1>
+        <p>Trải nghiệm công nghệ AI nhận diện tiền tệ hàng đầu, giúp bạn du lịch không giới hạn với tỷ giá thời gian thực.</p>
+        
+        <div class="search-bar">
+            <div class="input-group">
+                <i class="fa-solid fa-money-bill-transfer"></i>
+                <input type="text" placeholder="Bạn muốn đổi bao nhiêu?">
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-location-dot"></i>
+                <input type="text" placeholder="Tìm địa điểm đổi tiền">
+            </div>
+            <a href="map.html" class="btn btn-primary" style="border-radius: 30px; padding: 10px 30px;">
+                <i class="fa-solid fa-search"></i> Tìm kiếm
+            </a>
+        </div>
+    </section>
+
+    <section class="features-grid">
+        <div class="glass-card feature-card">
+            <div class="icon"><i class="fa-solid fa-map-location-dot"></i></div>
+            <h3 class="text-gradient">Địa điểm giao dịch</h3>
+            <p>Khám phá bản đồ các quầy thu đổi ngoại tệ uy tín, cập nhật trạng thái hoạt động theo thời gian thực xung quanh bạn.</p>
+        </div>
+        <div class="glass-card feature-card">
+            <div class="icon"><i class="fa-solid fa-camera"></i></div>
+            <h3 class="text-gradient">Quét AI Siêu Tốc</h3>
+            <p>Sử dụng camera để nhận diện mọi loại tiền tệ thế giới ngay lập tức với độ chính xác 99.9%.</p>
+            <a href="scan.html" class="flex items-center gap-2 mt-4" style="font-weight: 500;">Thử ngay <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="glass-card feature-card">
+            <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h3 class="text-gradient">Tỷ giá vàng</h3>
+            <p>Cập nhật biến động tỷ giá và thị trường vàng nội địa liên tục 24/7.</p>
+        </div>
+        <div class="glass-card feature-card">
+            <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3 class="text-gradient">Bảo mật tuyệt đối</h3>
+            <p>Dữ liệu giao dịch được mã hóa đầu cuối theo chuẩn quân đội.</p>
+        </div>
+    </section>
+
+    <section class="timeline-section">
+        <h2>Hành trình tiết kiệm của bạn</h2>
+        <p>Chúng tôi theo dõi tỷ giá để bạn có thể tập trung vào việc tận hưởng chuyến đi.</p>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="glass-card" style="padding: 16px;">
+                    <div style="font-size: 12px; color: var(--primary); margin-bottom: 4px; font-weight: 600;">NGÀY 1 - HÀ NỘI</div>
+                    <p style="font-size: 14px; margin-bottom: 8px;">Đổi 5.000.000 VNĐ sang JPY tại Phố Hà Trung.</p>
+                    <div style="color: var(--accent); font-weight: 600; font-size: 14px;">Tiết kiệm: 120.000 VNĐ</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="glass-card" style="padding: 16px;">
+                    <div style="font-size: 12px; color: var(--primary); margin-bottom: 4px; font-weight: 600;">NGÀY 5 - TOKYO</div>
+                    <p style="font-size: 14px; margin-bottom: 8px;">Rút tiền mặt tại ATM Seven-Bank với phí 0%</p>
+                    <div style="color: var(--primary); font-weight: 600; font-size: 14px;">Đề xuất: Dùng thẻ Visa Signature</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

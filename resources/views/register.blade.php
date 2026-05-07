@@ -1,0 +1,251 @@
+@extends('layouts.app')
+
+@section('title', 'Đăng ký')
+@section('hide_navbar', true)
+@section('hide_bottom_nav', true)
+
+@push('styles')
+<style>
+    .auth-container {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+    }
+    .auth-left {
+        flex: 1;
+        padding: 10%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        background: radial-gradient(circle at 0% 50%, rgba(6, 182, 212, 0.15) 0%, transparent 50%);
+    }
+    .auth-right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+    }
+    .hero-title {
+        font-size: 64px;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 24px;
+    }
+    .hero-title span {
+        color: var(--primary);
+    }
+    .hero-desc {
+        font-size: 18px;
+        color: var(--text-muted);
+        max-width: 400px;
+        line-height: 1.6;
+        margin-bottom: 40px;
+    }
+    .feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-main);
+        border: 1px solid var(--border);
+    }
+    
+    .auth-box {
+        width: 100%;
+        max-width: 480px;
+    }
+    .auth-box h2 {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+    .auth-box > p {
+        color: var(--text-muted);
+        margin-bottom: 32px;
+    }
+    .form-row {
+        display: flex;
+        gap: 16px;
+    }
+    .form-row .form-group {
+        flex: 1;
+    }
+    .input-with-icon {
+        position: relative;
+    }
+    .input-with-icon i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+    .input-with-icon input {
+        padding-left: 48px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+    .checkbox-group input {
+        margin-top: 4px;
+        accent-color: var(--primary);
+    }
+    .checkbox-group a {
+        color: var(--primary);
+    }
+    
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 32px 0;
+        color: var(--text-muted);
+        font-size: 12px;
+        letter-spacing: 1px;
+    }
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--border);
+    }
+    .divider:not(:empty)::before {
+        margin-right: .25em;
+    }
+    .divider:not(:empty)::after {
+        margin-left: .25em;
+    }
+    
+    .social-login {
+        display: flex;
+        gap: 16px;
+    }
+    .social-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .social-btn:hover {
+        background: rgba(255,255,255,0.05);
+    }
+    
+    @media (max-width: 900px) {
+        .auth-container {
+            flex-direction: column;
+        }
+        .auth-left {
+            padding: 40px 5%;
+            text-align: center;
+            align-items: center;
+        }
+    }
+</style>
+@endpush
+
+@section('content')
+<div class="animated-bg"></div>
+
+<div class="auth-container">
+    <div class="auth-left">
+        <h1 class="hero-title">Nâng tầm<br><span>hành trình</span></h1>
+        <p class="hero-desc">Truy cập hệ sinh thái du lịch kỹ thuật số tinh vi nhất thế giới. Quét thời gian thực, định tuyến thông minh và dịch vụ quản gia cao cấp ngay trong tầm tay bạn.</p>
+        
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fa-solid fa-shield-check"></i></div>
+                <span>Tích hợp sinh trắc học bảo mật</span>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fa-solid fa-compass"></i></div>
+                <span>Mạng lưới quản gia toàn cầu</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="auth-right">
+        <div class="glass-card auth-box">
+            <h2>Tạo tài khoản</h2>
+            <p>Nhập thông tin chi tiết của bạn để bắt đầu hành trình đẳng cấp.</p>
+            
+            <form action="{{ route('home') }}">
+                <div class="form-group">
+                    <label class="form-label">Họ và tên</label>
+                    <div class="input-with-icon">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" class="form-control" placeholder="Nguyễn Văn A">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Địa chỉ Email</label>
+                    <div class="input-with-icon">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" class="form-control" placeholder="john@smarttravel.io">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Mật khẩu</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Xác nhận</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-shield"></i>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms">
+                    <label for="terms">Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> điều chỉnh các giao thức du lịch toàn cầu.</label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Khởi tạo tài khoản <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+            
+            <div class="divider">HOẶC ĐĂNG KÝ VỚI</div>
+            
+            <div class="social-login">
+                <button class="social-btn"><i class="fa-solid fa-id-card"></i> Digital ID</button>
+                <button class="social-btn"><i class="fa-brands fa-google"></i> Google</button>
+            </div>
+            
+            <p class="text-center mt-8" style="font-size: 14px;">Đã có tài khoản du lịch? <a href="{{ route('login') }}" style="font-weight: 600;">Đăng nhập tại đây</a></p>
+        </div>
+    </div>
+</div>
+@endsection
