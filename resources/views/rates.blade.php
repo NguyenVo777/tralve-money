@@ -41,6 +41,49 @@
 .cur-select:hover { border-color: var(--primary); }
 .cur-select img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
 
+/* Currency Modal */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+    opacity: 0; transition: 0.3s;
+}
+.modal-overlay.active { display: flex; opacity: 1; }
+.currency-modal {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    width: 90%; max-width: 500px; border-radius: 24px; padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    transform: translateY(20px); transition: 0.3s;
+}
+.modal-overlay.active .currency-modal { transform: translateY(0); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h3 { font-size: 20px; font-weight: 700; }
+.close-modal { cursor: pointer; font-size: 20px; color: var(--text-muted); }
+.close-modal:hover { color: #fff; }
+
+.search-box {
+    background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+}
+.search-box input { background: transparent; border: none; color: #fff; width: 100%; outline: none; }
+
+.currency-list { max-height: 400px; overflow-y: auto; padding-right: 4px; }
+.currency-list::-webkit-scrollbar { width: 4px; }
+.currency-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+.currency-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;
+    margin-bottom: 4px;
+}
+.currency-item:hover { background: rgba(255,255,255,0.05); }
+.currency-item.active { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2); }
+.cur-info { display: flex; align-items: center; gap: 12px; }
+.cur-info img { width: 32px; height: 32px; border-radius: 50%; }
+.cur-code { font-weight: 700; font-size: 15px; }
+.cur-name { font-size: 13px; color: var(--text-muted); }
+
 .swap-btn {
     width: 48px; height: 48px; border-radius: 50%;
     background: var(--bg-surface); border: 1px solid var(--border);
@@ -171,43 +214,35 @@
                 <span class="highlight">1 USD = 25,410 VND</span>
             </div>
 
-            <button class="btn btn-primary w-full btn-lg" onclick="showToast('Đã lưu giao dịch vào lịch sử!', 'success')">
-                <i class="fa-solid fa-bookmark"></i> Lưu quy đổi này
+            <button class="btn btn-primary w-full btn-lg" onclick="performConversion()">
+                <i class="fa-solid fa-calculator"></i> Tính toán ngay
             </button>
 
             <!-- History -->
             <div class="history-list">
                 <div class="history-header">
-                    <h3>Lịch sử gần đây</h3>
-                    <a href="#" onclick="event.preventDefault(); showToast('Đã xóa lịch sử', 'info')">Xóa tất cả</a>
+                    <h3>Lịch sử của bạn</h3>
+                    <a href="#" onclick="event.preventDefault(); showToast('Tính năng đang phát triển', 'info')">Xem tất cả</a>
                 </div>
 
-                <div class="hist-item">
-                    <div class="left">
-                        <div class="hist-icon"><i class="fa-solid fa-euro-sign"></i></div>
-                        <div>
-                            <div class="pairs">EUR → VND</div>
-                            <div class="time">10 phút trước</div>
+                <div id="db-history">
+                    @forelse($history as $item)
+                    <div class="hist-item">
+                        <div class="left">
+                            <div class="hist-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                            <div>
+                                <div class="pairs">{{ $item->from_currency }} → {{ $item->to_currency }}</div>
+                                <div class="time">{{ $item->created_at->diffForHumans() }}</div>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div class="amt-from">{{ number_format($item->amount) }} {{ $item->from_currency }}</div>
+                            <div class="amt-to">{{ number_format($item->result) }} {{ $item->to_currency }}</div>
                         </div>
                     </div>
-                    <div class="right">
-                        <div class="amt-from">500 EUR</div>
-                        <div class="amt-to">13,825,000 ₫</div>
-                    </div>
-                </div>
-
-                <div class="hist-item">
-                    <div class="left">
-                        <div class="hist-icon"><i class="fa-solid fa-yen-sign"></i></div>
-                        <div>
-                            <div class="pairs">JPY → VND</div>
-                            <div class="time">2 giờ trước</div>
-                        </div>
-                    </div>
-                    <div class="right">
-                        <div class="amt-from">10,000 JPY</div>
-                        <div class="amt-to">1,654,000 ₫</div>
-                    </div>
+                    @empty
+                    <div class="text-muted text-center py-4" style="font-size: 14px;">Chưa có lịch sử quy đổi.</div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -274,32 +309,48 @@
 
     <!-- Pairs -->
     <div class="pairs-section">
-        <h3 class="pairs-header">Các cặp tiền tệ phổ biến</h3>
+        <h3 class="pairs-header">Các cặp tiền tệ Đông Nam Á phổ biến</h3>
         <div class="pairs-grid">
             <div class="pair-card">
-                <div class="lbl">EUR / USD</div>
-                <div class="val">1.0845</div>
-                <div class="chg dn">▼ -0.15%</div>
+                <div class="lbl">USD / VND</div>
+                <div class="val">25,410</div>
+                <div class="chg up">▲ +0.12%</div>
             </div>
             <div class="pair-card">
-                <div class="lbl">GBP / USD</div>
-                <div class="val">1.2630</div>
+                <div class="lbl">THB / VND</div>
+                <div class="val">692.5</div>
+                <div class="chg dn">▼ -0.05%</div>
+            </div>
+            <div class="pair-card">
+                <div class="lbl">SGD / VND</div>
+                <div class="val">18,850</div>
+                <div class="chg up">▲ +0.21%</div>
+            </div>
+            <div class="pair-card">
+                <div class="lbl">MYR / VND</div>
+                <div class="val">5,380</div>
+                <div class="chg dn">▼ -0.11%</div>
+            </div>
+            <div class="pair-card">
+                <div class="lbl">IDR / VND</div>
+                <div class="val">1.58</div>
                 <div class="chg up">▲ +0.08%</div>
             </div>
-            <div class="pair-card">
-                <div class="lbl">USD / JPY</div>
-                <div class="val">150.82</div>
-                <div class="chg up">▲ +0.45%</div>
+        </div>
+    </div>
+    <!-- Currency Selector Modal -->
+    <div class="modal-overlay" id="currencyModal">
+        <div class="currency-modal">
+            <div class="modal-header">
+                <h3>Chọn loại tiền tệ</h3>
+                <div class="close-modal" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
             </div>
-            <div class="pair-card">
-                <div class="lbl">AUD / USD</div>
-                <div class="val">0.6540</div>
-                <div class="chg dn">▼ -0.21%</div>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                <input type="text" placeholder="Tìm kiếm quốc gia hoặc mã tiền tệ..." id="curSearch">
             </div>
-            <div class="pair-card">
-                <div class="lbl">USD / CHF</div>
-                <div class="val">0.8920</div>
-                <div class="chg up">▲ +0.11%</div>
+            <div class="currency-list" id="currencyList">
+                <!-- Items injected via JS -->
             </div>
         </div>
     </div>
@@ -308,58 +359,248 @@
 
 @push('scripts')
 <script>
-// Mockup logic for interaction
+// Currency Data (Focus on ASEAN)
+const currencies = [
+    { code: 'VND', name: 'Việt Nam Đồng', flag: 'vn', rate: 1 },
+    { code: 'THB', name: 'Thai Baht', flag: 'th', rate: 0.0014 }, // Example rates relative to VND
+    { code: 'SGD', name: 'Singapore Dollar', flag: 'sg', rate: 0.000053 },
+    { code: 'MYR', name: 'Malaysian Ringgit', flag: 'my', rate: 0.00019 },
+    { code: 'IDR', name: 'Indonesian Rupiah', flag: 'id', rate: 0.63 },
+    { code: 'PHP', name: 'Philippine Peso', flag: 'ph', rate: 0.0023 },
+    { code: 'KHR', name: 'Cambodian Riel', flag: 'kh', rate: 0.16 },
+    { code: 'LAK', name: 'Lao Kip', flag: 'la', rate: 0.85 },
+    { code: 'MMK', name: 'Myanmar Kyat', flag: 'mm', rate: 0.082 },
+    { code: 'BND', name: 'Brunei Dollar', flag: 'bn', rate: 0.000053 },
+    { code: 'USD', name: 'US Dollar', flag: 'us', rate: 0.000039 },
+    { code: 'EUR', name: 'Euro', flag: 'eu', rate: 0.000036 },
+    { code: 'JPY', name: 'Japanese Yen', flag: 'jp', rate: 0.0061 },
+];
+
+let activeSelector = null;
+let currentFrom = 'USD';
+let currentTo = 'VND';
+
+// Mock rates from a base (VND)
+// 1 USD = 25,410 VND
+// 1 THB = 690 VND
+// 1 SGD = 18,800 VND
+// 1 MYR = 5,400 VND
+// ...
+const baseRates = {
+    'VND': 1,
+    'USD': 25410,
+    'THB': 692.5,
+    'SGD': 18850,
+    'MYR': 5380,
+    'IDR': 1.58,
+    'PHP': 442,
+    'KHR': 6.2,
+    'LAK': 1.18,
+    'MMK': 12.1,
+    'BND': 18850,
+    'EUR': 27500,
+    'JPY': 165
+};
+
 const inputFrom = document.getElementById('amt-from');
 const inputTo = document.getElementById('amt-to');
-const rate = 25410;
+const curFromBtn = document.getElementById('cur-from');
+const curToBtn = document.getElementById('cur-to');
+const modal = document.getElementById('currencyModal');
+const searchInput = document.getElementById('curSearch');
 
 function formatNumber(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (num < 0.01 && num > 0) return num.toFixed(6);
+    if (num < 1 && num > 0) return num.toFixed(4);
+    return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function parseNumber(str) {
     return parseFloat(str.replace(/,/g, '')) || 0;
 }
 
-inputFrom.addEventListener('input', function(e) {
-    // Remove non-digits
-    let val = this.value.replace(/[^0-9]/g, '');
-    if(!val) { inputTo.value = '0'; return; }
+function updateConversion() {
+    const amount = parseNumber(inputFrom.value);
+    const rateFrom = baseRates[currentFrom];
+    const rateTo = baseRates[currentTo];
     
-    // Format input
-    this.value = formatNumber(val);
+    // Amount in VND = amount * rateFrom
+    // Amount in To = (Amount in VND) / rateTo
+    const result = (amount * rateFrom) / rateTo;
     
-    // Calc result
-    const num = parseNumber(this.value);
-    inputTo.value = formatNumber(num * rate);
+    inputTo.value = formatNumber(result);
+    
+    // Update rate info text
+    let displayRate = rateFrom / rateTo;
+    let baseAmount = 1;
+    let baseCode = currentFrom;
+
+    if (currentFrom === 'VND' && displayRate < 0.1) {
+        baseAmount = 1000;
+        displayRate = (baseAmount * rateFrom) / rateTo;
+    }
+
+    document.querySelector('.rate-info .highlight').innerText = `${baseAmount.toLocaleString()} ${baseCode} = ${formatNumber(displayRate)} ${currentTo}`;
+    
+    // Update chart title (mock)
+    const chartTitle = document.querySelector('.ch-left h2');
+    if(chartTitle) chartTitle.innerText = `${currentFrom} / ${currentTo}`;
+    
+    const chartVal = document.querySelector('.ch-left .val');
+    if(chartVal) chartVal.innerText = formatNumber(displayRate);
+}
+
+inputFrom.addEventListener('input', function() {
+    let val = this.value.replace(/[^0-9.]/g, '');
+    if(val.split('.').length > 2) val = val.substring(0, val.lastIndexOf('.'));
+    
+    const num = parseFloat(val) || 0;
+    this.value = num.toLocaleString('en-US');
+    updateConversion();
 });
 
-function swapCurrencies() {
-    const fromCur = document.querySelector('#cur-from span').innerText;
-    const fromImg = document.querySelector('#cur-from img').src;
-    
-    const toCur = document.querySelector('#cur-to span').innerText;
-    const toImg = document.querySelector('#cur-to img').src;
-    
-    document.querySelector('#cur-from span').innerText = toCur;
-    document.querySelector('#cur-from img').src = toImg;
-    
-    document.querySelector('#cur-to span').innerText = fromCur;
-    document.querySelector('#cur-to img').src = fromImg;
-    
-    // Reset values for simplicity
-    inputFrom.value = "1,000";
-    // Dummy rate logic based on swap
-    if(fromCur === 'USD') {
-        inputTo.value = "39.35"; // VND to USD roughly
-        document.querySelector('.rate-info .highlight').innerText = "1 VND = 0.000039 USD";
+function openModal(selector) {
+    activeSelector = selector;
+    modal.classList.add('active');
+    renderCurrencies();
+}
+
+function closeModal() {
+    modal.classList.remove('active');
+}
+
+function selectCurrency(code) {
+    const cur = currencies.find(c => c.code === code);
+    if (activeSelector === 'from') {
+        currentFrom = code;
+        curFromBtn.querySelector('span').innerText = code;
+        curFromBtn.querySelector('img').src = `https://flagcdn.com/w40/${cur.flag}.png`;
     } else {
-        inputTo.value = "25,410,000";
-        document.querySelector('.rate-info .highlight').innerText = "1 USD = 25,410 VND";
+        currentTo = code;
+        curToBtn.querySelector('span').innerText = code;
+        curToBtn.querySelector('img').src = `https://flagcdn.com/w40/${cur.flag}.png`;
     }
+    closeModal();
+    updateConversion();
+}
+
+function renderCurrencies(filter = '') {
+    const container = document.getElementById('currencyList');
+    container.innerHTML = '';
     
+    const filtered = currencies.filter(c => 
+        c.code.toLowerCase().includes(filter.toLowerCase()) || 
+        c.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    
+    filtered.forEach(cur => {
+        const isActive = (activeSelector === 'from' && currentFrom === cur.code) || 
+                         (activeSelector === 'to' && currentTo === cur.code);
+                         
+        const item = document.createElement('div');
+        item.className = `currency-item ${isActive ? 'active' : ''}`;
+        item.onclick = () => selectCurrency(cur.code);
+        item.innerHTML = `
+            <div class="cur-info">
+                <img src="https://flagcdn.com/w40/${cur.flag}.png" alt="${cur.code}">
+                <div>
+                    <div class="cur-code">${cur.code}</div>
+                    <div class="cur-name">${cur.name}</div>
+                </div>
+            </div>
+            ${isActive ? '<i class="fa-solid fa-check text-primary"></i>' : ''}
+        `;
+        container.appendChild(item);
+    });
+}
+
+searchInput.addEventListener('input', (e) => {
+    renderCurrencies(e.target.value);
+});
+
+curFromBtn.onclick = () => openModal('from');
+curToBtn.onclick = () => openModal('to');
+
+function swapCurrencies() {
+    const temp = currentFrom;
+    currentFrom = currentTo;
+    currentTo = temp;
+    
+    const curF = currencies.find(c => c.code === currentFrom);
+    const curT = currencies.find(c => c.code === currentTo);
+    
+    curFromBtn.querySelector('span').innerText = currentFrom;
+    curFromBtn.querySelector('img').src = `https://flagcdn.com/w40/${curF.flag}.png`;
+    
+    curToBtn.querySelector('span').innerText = currentTo;
+    curToBtn.querySelector('img').src = `https://flagcdn.com/w40/${curT.flag}.png`;
+    
+    updateConversion();
     showToast('Đã đảo ngược chiều chuyển đổi', 'info');
 }
+
+function performConversion() {
+    updateConversion();
+    
+    const amount = parseNumber(inputFrom.value);
+    const result = parseNumber(inputTo.value);
+    const rateFrom = baseRates[currentFrom];
+    const rateTo = baseRates[currentTo];
+    const rate = rateFrom / rateTo;
+
+    // Save to Database via AJAX
+    fetch('{{ route("rates.store") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            from_currency: currentFrom,
+            to_currency: currentTo,
+            amount: amount,
+            result: result,
+            rate: rate
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Đã lưu quy đổi vào lịch sử!', 'success');
+            // Refresh history list (simplified: just prepend the new item)
+            const historyList = document.getElementById('db-history');
+            const emptyMsg = historyList.querySelector('.text-center');
+            if(emptyMsg) emptyMsg.remove();
+
+            const newItem = document.createElement('div');
+            newItem.className = 'hist-item';
+            newItem.style.animation = 'fadeIn 0.5s ease-out';
+            newItem.innerHTML = `
+                <div class="left">
+                    <div class="hist-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div>
+                        <div class="pairs">${currentFrom} → ${currentTo}</div>
+                        <div class="time">Vừa xong</div>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="amt-from">${inputFrom.value} ${currentFrom}</div>
+                    <div class="amt-to">${inputTo.value} ${currentTo}</div>
+                </div>
+            `;
+            historyList.insertBefore(newItem, historyList.firstChild);
+        } else {
+            showToast(data.message || 'Lỗi khi lưu lịch sử', 'warning');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Không thể kết nối máy chủ', 'danger');
+    });
+}
+
+// Initial update
+updateConversion();
 
 // Update time
 const now = new Date();

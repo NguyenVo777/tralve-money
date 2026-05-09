@@ -26,7 +26,6 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Outfit', sans-serif;
 }
 
 html { scroll-behavior: smooth; }
@@ -38,6 +37,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    font-family: 'Outfit', sans-serif;
 }
 
 a {
@@ -315,6 +315,9 @@ a:hover { color: #fff; }
     padding: 12px 0 16px;
     z-index: 400;
 }
+@media (min-width: 769px) {
+    .bottom-nav { display: none; }
+}
 .nav-item {
     display: flex;
     flex-direction: column;
@@ -487,6 +490,6 @@ a:hover { color: #fff; }
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .navbar { padding: 0 4%; }
-    .nav-links { display: none; }
+    .nav-links, .nav-actions { display: none; }
     .section-title { font-size: 28px; }
 }

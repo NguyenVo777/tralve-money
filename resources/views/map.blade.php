@@ -2,7 +2,7 @@
 @section('title', 'Bản đồ Địa điểm')
 
 @push('styles')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+
 <style>
 /* Remove margin from body to make map full height */
 .map-page {
@@ -203,119 +203,224 @@
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places"></script>
 <script>
-// Mock Data
-const db = [
-    { id: 1, name: 'Hưng Long Exchange', addr: '36 Mạc Thị Bưởi, Quận 1, TP.HCM', rate: '25,410', lat: 10.7745, lng: 106.7042, dist: '0.4 km', star: '4.9', rev: '1.2k', ver: true },
-    { id: 2, name: 'Quầy Thu Đổi 59', addr: '135 Đồng Khởi, Quận 1, TP.HCM', rate: '25,405', lat: 10.7760, lng: 106.7030, dist: '0.6 km', star: '4.7', rev: '850', ver: true },
-    { id: 3, name: 'Vietcombank - CN Bến Thành', addr: 'Bến Chương Dương, Quận 1', rate: '25,385', lat: 10.7688, lng: 106.7020, dist: '1.2 km', star: '4.8', rev: '2k+', ver: false },
-    { id: 4, name: 'Kim Châu Jewelry', addr: 'Chợ Bến Thành, Quận 1', rate: '25,420', lat: 10.7725, lng: 106.6980, dist: '0.8 km', star: '4.5', rev: '430', ver: true },
-    { id: 5, name: 'Minh Phát Exchange', addr: 'Lê Thánh Tôn, Quận 1', rate: '25,390', lat: 10.7780, lng: 106.7000, dist: '1.5 km', star: '4.6', rev: '600', ver: false }
-];
-
-// Initialize Map
-const map = L.map('map', { zoomControl: false }).setView([10.7730, 106.7020], 15);
-L.control.zoom({ position: 'bottomright' }).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO'
-}).addTo(map);
-
-// DOM Elements
+let map, placesService, infoWindow;
+let markers = [];
 const listEl = document.getElementById('loc-list');
 const panelEl = document.getElementById('info-panel');
-let markers = {};
-let activeId = null;
+const searchInput = document.getElementById('search-input');
 
-function closePanel() {
-    panelEl.classList.remove('visible');
-    activeId = null;
-    updateStyles();
+function initMap() {
+    const defaultLoc = { lat: 10.7730, lng: 106.7020 }; // HCM City
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: defaultLoc,
+        zoom: 15,
+        styles: [
+            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+            {
+                featureType: "administrative.locality",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "poi",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d59563" }],
+            },
+            {
+                featureType: "poi.park",
+                elementType: "geometry",
+                stylers: [{ color: "#263c3f" }],
+            },
+            {
+                featureType: "poi.park",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#6b9a76" }],
+            },
+            {
+                featureType: "road",
+                elementType: "geometry",
+                stylers: [{ color: "#38414e" }],
+            },
+            {
+                featureType: "road",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#212a37" }],
+            },
+            {
+                featureType: "road",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#9ca5b3" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry",
+                stylers: [{ color: "#746855" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#1f2835" }],
+            },
+            {
+                featureType: "road.highway",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#f3d19c" }],
+            },
+            {
+                featureType: "water",
+                elementType: "geometry",
+                stylers: [{ color: "#17263c" }],
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#515c6d" }],
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.stroke",
+                stylers: [{ color: "#17263c" }],
+            },
+        ],
+    });
+
+    placesService = new google.maps.places.PlacesService(map);
+    
+    // Attempt to get user location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+                map.setCenter(pos);
+                searchPlaces(pos);
+            },
+            () => { searchPlaces(defaultLoc); }
+        );
+    } else {
+        searchPlaces(defaultLoc);
+    }
 }
 
-function selectLoc(id) {
-    const loc = db.find(l => l.id === id);
-    if(!loc) return;
-    
-    activeId = id;
-    map.flyTo([loc.lat, loc.lng], 16, { duration: 1.5 });
-    
-    // Update Panel
-    document.getElementById('ip-name').innerText = loc.name;
-    document.getElementById('ip-addr').innerText = loc.addr;
-    document.getElementById('ip-rate').innerText = loc.rate;
-    document.getElementById('ip-dist').innerText = loc.dist;
-    panelEl.classList.add('visible');
-    
-    updateStyles();
-}
+function searchPlaces(location, keyword = 'currency exchange') {
+    const request = {
+        location: location,
+        radius: '5000',
+        query: keyword
+    };
 
-function updateStyles() {
-    // List Cards
-    document.querySelectorAll('.loc-card').forEach(el => {
-        if(el.dataset.id == activeId) el.classList.add('active');
-        else el.classList.remove('active');
-    });
-    
-    // Markers
-    Object.keys(markers).forEach(k => {
-        const id = parseInt(k);
-        const loc = db.find(l => l.id === id);
-        const icon = markers[id].getIcon();
-        const isActive = (id === activeId);
-        
-        icon.options.html = `
-            <div class="custom-marker ${isActive ? 'active' : ''}">
-                <div class="cm-bubble">${loc.rate}</div>
-                <div class="cm-dot"></div>
-            </div>
-        `;
-        markers[id].setIcon(icon);
+    placesService.textSearch(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+            clearResults();
+            results.forEach((place, index) => {
+                createMarker(place);
+                addToList(place, index);
+            });
+        }
     });
 }
 
-// Render Data
-db.forEach(loc => {
-    // Render Marker
-    const icon = L.divIcon({
-        className: '',
-        html: `
-            <div class="custom-marker">
-                <div class="cm-bubble">${loc.rate}</div>
-                <div class="cm-dot"></div>
-            </div>
-        `,
-        iconSize: [60, 50],
-        iconAnchor: [30, 50]
+function clearResults() {
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+    listEl.innerHTML = '';
+}
+
+function createMarker(place) {
+    if (!place.geometry || !place.geometry.location) return;
+    const marker = new google.maps.Marker({
+        map,
+        position: place.geometry.location,
+        title: place.name,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "var(--primary)",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#ffffff",
+        }
     });
-    
-    const marker = L.marker([loc.lat, loc.lng], {icon}).addTo(map);
-    marker.on('click', () => selectLoc(loc.id));
-    markers[loc.id] = marker;
-    
-    // Render List Item
+
+    marker.addListener('click', () => {
+        selectLoc(place);
+    });
+
+    markers.push(marker);
+}
+
+function addToList(place, index) {
     const card = document.createElement('div');
     card.className = 'loc-card';
-    card.dataset.id = loc.id;
-    card.onclick = () => selectLoc(loc.id);
+    card.dataset.id = place.place_id;
+    card.onclick = () => selectLoc(place);
     
-    const badge = loc.ver ? '<i class="fa-solid fa-shield-check" title="Đã xác thực"></i>' : '';
+    const rating = place.rating ? place.rating : 'N/A';
+    const reviews = place.user_ratings_total ? place.user_ratings_total : '0';
+    const openNow = (place.opening_hours && place.opening_hours.isOpen()) ? 
+                    '<span style="color:var(--accent)"><i class="fa-solid fa-clock"></i> Đang mở</span>' : 
+                    '<span style="color:var(--text-muted)"><i class="fa-solid fa-clock"></i> Đóng cửa</span>';
     
     card.innerHTML = `
         <div class="loc-head">
-            <div class="loc-title">${loc.name} ${badge}</div>
-            <div class="loc-rate">${loc.rate}</div>
+            <div class="loc-title">${place.name}</div>
         </div>
-        <div class="loc-addr">${loc.addr}</div>
+        <div class="loc-addr">${place.formatted_address || place.vicinity}</div>
         <div class="loc-foot">
             <div class="loc-meta">
-                <span><i class="fa-solid fa-location-dot"></i> ${loc.dist}</span>
-                <span><i class="fa-solid fa-star"></i> ${loc.star} (${loc.rev})</span>
+                ${openNow}
+                <span><i class="fa-solid fa-star"></i> ${rating} (${reviews})</span>
             </div>
-            <span style="color:var(--primary);font-weight:600">USD</span>
         </div>
     `;
     listEl.appendChild(card);
+}
+
+function selectLoc(place) {
+    map.panTo(place.geometry.location);
+    map.setZoom(17);
+    
+    // Update Panel
+    document.getElementById('ip-name').innerText = place.name;
+    document.getElementById('ip-addr').innerText = place.formatted_address || place.vicinity;
+    document.getElementById('ip-rate').innerText = 'Tra cứu tại quầy'; // Google doesn't have exchange rates
+    document.getElementById('ip-dist').innerText = 'Tính toán...';
+    
+    panelEl.classList.add('visible');
+    
+    // Highlight list item
+    document.querySelectorAll('.loc-card').forEach(el => {
+        if(el.dataset.id === place.place_id) el.classList.add('active');
+        else el.classList.remove('active');
+    });
+}
+
+function closePanel() {
+    panelEl.classList.remove('visible');
+    document.querySelectorAll('.loc-card').forEach(el => el.classList.remove('active'));
+}
+
+searchInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        searchPlaces(map.getCenter(), this.value || 'currency exchange');
+    }
 });
+
+// Load map once script is ready
+window.onload = () => {
+    // Note: Since we are not using async/defer in script tag due to placeholder key,
+    // we initialize it directly if google is available.
+    if(typeof google !== 'undefined') {
+        initMap();
+    } else {
+        listEl.innerHTML = '<div style="padding: 20px; color: var(--danger);">Vui lòng thiết lập API Key của Google Maps trong file map.blade.php.</div>';
+    }
+};
 </script>
 @endpush

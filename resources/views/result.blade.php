@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('title', 'Kết quả Quét')
-@section('hide_navbar', true)
 
 @push('styles')
 <style>
@@ -12,16 +11,21 @@
     }
     
     .scan-header {
-        position: fixed;
-        top: 0; left: 0; width: 100%;
-        padding: 20px 5%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: rgba(11, 17, 32, 0.9);
-        backdrop-filter: blur(10px);
-        z-index: 100;
-        border-bottom: 1px solid var(--border);
+        display: none;
+    }
+    @media (max-width: 768px) {
+        .scan-header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 17, 32, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
     }
     
     .grid-container {
