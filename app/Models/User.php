@@ -24,6 +24,13 @@ class User extends Authenticatable
         'full_name',
         'email',
         'password',
+        'phone',
+        'country',
+        'language',
+        'avatar',
+        'role',
+        'status',
+        'last_login_at',
     ];
 
     /**
@@ -46,6 +53,37 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    public function scans()
+    {
+        return $this->hasMany(Scan::class);
+    }
+
+    public function conversions()
+    {
+        return $this->hasMany(ConversionHistory::class);
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    public function loginLogs()
+    {
+        return $this->hasMany(LoginLog::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isLocked()
+    {
+        return $this->status === 'locked';
     }
 }

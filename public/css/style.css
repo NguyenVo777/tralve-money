@@ -487,6 +487,25 @@ a:hover { color: #fff; }
     background: var(--border);
 }
 
+/* ===== ALERTS ===== */
+.alert {
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.alert-success {
+    background: rgba(0, 229, 195, 0.1);
+    color: var(--accent);
+    border: 1px solid rgba(0, 229, 195, 0.2);
+}
+.alert-error {
+    background: rgba(255, 77, 109, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(255, 77, 109, 0.2);
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .navbar { padding: 0 4%; }

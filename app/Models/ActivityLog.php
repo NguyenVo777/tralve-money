@@ -4,15 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Scan extends Model
+class ActivityLog extends Model
 {
     protected $fillable = [
         'user_id',
-        'currency',
-        'image_path',
-        'result',
-        'accuracy',
-        'status',
+        'action',
+        'details',
+        'ip_address',
     ];
 
     public function user()

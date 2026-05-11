@@ -30,6 +30,11 @@ Route::post('/login', function (Request $request) {
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
+        
+        if (Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard')->with('success', 'Chào mừng Admin quay trở lại!');
+        }
+        
         return redirect()->intended(route('home'))->with('success', 'Đăng nhập thành công!');
     }
 
@@ -97,3 +102,41 @@ Route::post('/rates/store', [RateController::class, 'store'])->name('rates.store
 Route::get('/analysis', fn() => view('analysis'))->name('analysis');
 Route::post('/analysis', [AnalysisController::class, 'analyze'])->name('analysis.post');
 Route::get('/result', fn() => view('result'))->name('result');
+
+// ─── Profile routes ─────────────────────────────────────────────────────────────
+
+use App\Http\Controllers\ProfileController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
+    Route::post('/profile/dark-mode', [ProfileController::class, 'toggleDarkMode'])->name('profile.dark-mode');
+});
+
+// ─── Admin routes ───────────────────────────────────────────────────────────────
+
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\RateCMSController;
+
+Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/users', [DashboardController::class, 'users'])->name('users');
+    Route::get('/users/{id}', [DashboardController::class, 'userDetail'])->name('users.detail');
+    Route::post('/users/{id}/toggle', [DashboardController::class, 'toggleStatus'])->name('users.toggle');
+    Route::delete('/users/{id}', [DashboardController::class, 'deleteUser'])->name('users.delete');
+    
+    // Rates CMS
+    Route::get('/rates', [RateCMSController::class, 'index'])->name('rates');
+    Route::post('/rates', [RateCMSController::class, 'store'])->name('rates.store');
+    Route::put('/rates/{id}', [RateCMSController::class, 'update'])->name('rates.update');
+    Route::delete('/rates/{id}', [RateCMSController::class, 'destroy'])->name('rates.delete');
+    Route::post('/rates/{id}/toggle', [RateCMSController::class, 'toggleStatus'])->name('rates.toggle');
+    Route::post('/rates/settings', [RateCMSController::class, 'updateSettings'])->name('rates.settings');
+    Route::post('/rates/news', [RateCMSController::class, 'storeNews'])->name('rates.news.store');
+    Route::delete('/rates/news/{id}', [RateCMSController::class, 'deleteNews'])->name('rates.news.delete');
+    Route::post('/rates/update-rates', [RateCMSController::class, 'updateRates'])->name('rates.update-rates');
+    Route::post('/rates/update-ai', [RateCMSController::class, 'updateAIAnalysis'])->name('rates.update-ai');
+    Route::post('/rates/update-cms', [RateCMSController::class, 'autoUpdateCMS'])->name('rates.update-cms');
+    Route::post('/rates/update-charts', [RateCMSController::class, 'autoUpdateCharts'])->name('rates.update-charts');
+});

@@ -414,7 +414,7 @@
 <section class="howto-section">
     <div class="text-center">
         <div class="section-label">Cách hoạt động</div>
-        <h2 class="section-title">Chỉ 3 bước đơn giản</h2>
+        <h2 class="section-title">Chỉ 4 bước đơn giản</h2>
         <p class="section-desc" style="margin:0 auto;">Bắt đầu trải nghiệm SmartTravel trong vài giây.</p>
     </div>
 

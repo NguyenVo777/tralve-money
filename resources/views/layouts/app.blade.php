@@ -48,17 +48,24 @@
                 @auth
                     {{-- Đã đăng nhập --}}
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted); font-size:13px;">
+                        <a href="{{ route('profile.index') }}" style="display:flex; align-items:center; gap:8px; color:var(--text-muted); font-size:13px; text-decoration:none;">
                             <div
                                 style="width:32px; height:32px; border-radius:50%; background:rgba(0,212,255,0.15); border:1px solid rgba(0,212,255,0.3); display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:14px;">
                                 <i class="fa-solid fa-user"></i>
                             </div>
-                            <span>{{ Auth::user()->full_name }}</span>
-                        </div>
+                            <span class="profile-name">{{ Auth::user()->full_name }}</span>
+                        </a>
+
+                        @if(Auth::user()->role === 'admin')
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-user-shield"></i> Admin
+                            </a>
+                        @endif
+
                         <form action="{{ route('logout') }}" method="POST" style="margin:0;">
                             @csrf
                             <button type="submit" class="btn btn-outline btn-sm">
-                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                                <i class="fa-solid fa-right-from-bracket"></i>
                             </button>
                         </form>
                     </div>
